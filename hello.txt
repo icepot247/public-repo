@@ -1,37 +1,41 @@
-# This is a basic workflow to help you get started with Actions
-name: Deploy
- 
- 
- 
-"on":
-  push:
-    branches:
-      - main
-    paths:
-      - 'frontend/**'
-	 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
-ACCESS_TOKEN	 
+This is how I fixed my problem,
+I created a Personal Access Token from my developer settings and copied it for later step.
+
+I added ACCESS_TOKEN environment variable by navigating to my repository settings and adding a secret. Here I pasted the previously created access token.
+
+Then simply that code and using secrets context to access that token, note that name is similar to the one we created before
+
+In left menu of repo settings
+
+Now just push the code to repo and everything will work like charm :).
+
+name: deploy-me
+'on':
+    - push
 jobs:
-  post:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Creates output folder and remove markdown
-        run:  |
-          mkdir output
-          rm -rf frontend/*/*.md
-          cp -r frontend output
+    deploy-me:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - uses: actions/setup-node@v2
+              with:
+                  node-version: '14'
+              env:
+                  ACCESS_TOKEN: '${{ secrets.ACCESS_TOKEN }}'
+            - run: npm install
+            - run: npm run build
+            - run: |
+                  cd lib
+                  git config --global user.email "hi@aliasifkhan.com"
+                  git config --global user.name "aliasifk"
+                  git config --global credential.helper cache
+                  git clone https://${{secrets.ACCESS_TOKEN}}@github.com/aliasifk/xxxxxx
+                  cp index.js clonedFolder/ -f
+                  cd clonedFolder
+                  git add .
+                  git commit -m "$(date)"
+                  git push
+				  
 
 
-      - name: Pushes to public repository
-        id: push_directory
-        uses: cpina/github-action-push-to-another-repository@ssh-deploy-key
-        env:
-          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-        with:
-          source-directory: output/
-          destination-github-username: 'icepot247'
-          destination-repository-name: 'public-repo'
-          user-email: icepot247@gmail.com
-          commit-message: pushed from $GITHUB_REF
-          target-branch: main
+https://stackoverflow.com/questions/70225077/how-to-commit-and-push-to-a-private-repoa-from-a-different-repob-in-github
