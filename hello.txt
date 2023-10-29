@@ -1,0 +1,37 @@
+# This is a basic workflow to help you get started with Actions
+name: Deploy
+ 
+ 
+ 
+"on":
+  push:
+    branches:
+      - main
+    paths:
+      - 'frontend/**'
+	 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
+ACCESS_TOKEN	 
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Creates output folder and remove markdown
+        run:  |
+          mkdir output
+          rm -rf frontend/*/*.md
+          cp -r frontend output
+
+
+      - name: Pushes to public repository
+        id: push_directory
+        uses: cpina/github-action-push-to-another-repository@ssh-deploy-key
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        with:
+          source-directory: output/
+          destination-github-username: 'icepot247'
+          destination-repository-name: 'public-repo'
+          user-email: icepot247@gmail.com
+          commit-message: pushed from $GITHUB_REF
+          target-branch: main
